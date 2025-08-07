@@ -273,9 +273,10 @@ Mohon konfirmasi ketersediaan dan detail selanjutnya. Terima kasih!
         `.trim();
 
         // Mengarahkan langsung ke WhatsApp dengan nomor baru
-        const whatsappUrl = `https://wa.me/6289515750507text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/6289515750507?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         
         detailModal.hide();
     });
 });
+
