@@ -3,9 +3,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnDetailList = document.querySelectorAll('.btnDetail');
     const modalJudul = document.getElementById('modal-judul-produk');
     const modalDeskripsi = document.getElementById('modal-deskripsi-produk');
-    const modalGambar = document.getElementById('modal-gambar-produk');
+    const modalGambar = document = 'modal-gambar-produk');
     const modalBiayaPerjalanan = document.getElementById('modal-biaya-perjalanan');
     const modalTotalPembayaran = document.getElementById('modal-total-pembayaran');
+    const modalJarakTempuh = document.getElementById('modal-jarak-tempuh');
     const bookingForm = document.getElementById('bookingForm');
     const namaPembeliInput = document.getElementById('namaPembeli');
     const alamatLengkapInput = document.getElementById('alamatLengkap');
@@ -63,6 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
             bookingForm.reset();
             modalBiayaPerjalanan.innerText = 'Menunggu lokasi...';
             modalTotalPembayaran.innerText = 'Menunggu lokasi...';
+            modalJarakTempuh.parentElement.classList.add('d-none');
             stokStatusSpan.innerText = 'Pilih tanggal dan jam';
             stokStatusSpan.classList.remove('text-success', 'text-danger');
             stokStatusSpan.classList.add('text-warning');
@@ -140,12 +142,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         const distanceKm = R * c;
+        const distanceM = distanceKm * 1000;
 
         let oneWayPrice;
-        if (distanceKm <= 5) {
-            oneWayPrice = 5000 + (distanceKm * 1000 * 7); // Tarif per meter
-        } else {
-            oneWayPrice = 5000 + (5000 * 7) + ((distanceKm - 5) * 1000 * 6); // Tarif per meter dengan diskon
+        const tarif500m = 5000;
+        const tarifNormalPerM = 7.5;
+        const tarifDiskonPerM = 6;
+        const batasNormal = 5000; // 5 km dalam meter
+
+        if (distanceM <= 500) {
+            oneWayPrice = tarif500m;
+        } else if (distanceM > 500 && distanceM <= batasNormal) {
+            const sisaJarakM = distanceM - 500;
+            oneWayPrice = tarif500m + (sisaJarakM * tarifNormalPerM);
+        } else { // distanceM > 5000
+            const jarakNormal = batasNormal - 500;
+            const jarakDiskon = distanceM - batasNormal;
+            oneWayPrice = tarif500m + (jarakNormal * tarifNormalPerM) + (jarakDiskon * tarifDiskonPerM);
         }
 
         oneWayPrice = Math.round(oneWayPrice / 100) * 100; // Round to nearest 100
@@ -261,7 +274,7 @@ Berikut detail pesanan saya:
 *Nama:* ${namaPembeli}
 *Rute:* ${currentCardData.title}
 *Alamat Lengkap:* ${alamatLengkap}
-*Titik Lokasi penjemputan (Google Maps):* ${lokasiGoogleMaps}
+*Titik Lokasi (Google Maps):* ${lokasiGoogleMaps}
 *Tanggal Booking:* ${tanggalBooking}
 *Jam Berangkat:* ${waktuBerangkat}
 *Jam Pulang:* ${waktuPulang}
@@ -272,11 +285,10 @@ Berikut detail pesanan saya:
 Mohon konfirmasi ketersediaan dan detail selanjutnya. Terima kasih!
         `.trim();
 
-        // Mengarahkan langsung ke WhatsApp dengan nomor baru
+        // Mengarahkan langsung ke WhatsApp dengan nomor yang sudah dikonfirmasi
         const whatsappUrl = `https://wa.me/6289515750507?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         
         detailModal.hide();
     });
 });
-
