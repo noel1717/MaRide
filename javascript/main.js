@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const modalTotalPembayaran = document.getElementById('modal-total-pembayaran');
     const modalJarakTempuh = document.getElementById('modal-jarak-tempuh');
     const bookingForm = document.getElementById('bookingForm');
+    const namaPembeliInput = document.getElementById('namaPembeli');
+    const alamatLengkapInput = document.getElementById('alamatLengkap');
     const lokasiGoogleMapsInput = document.getElementById('lokasiGoogleMaps');
     const shareLocBtn = document.getElementById('shareLocBtn');
     const geolocationError = document.getElementById('geolocationError');
@@ -21,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const ticketDetails = document.getElementById('ticketDetails');
     const cetakTiketBtn = document.getElementById('cetakTiketBtn');
 
-    // Variabel untuk menyimpan data simulasi stok
+    // Data simulasi stok, setiap slot waktu memiliki 15 kursi
     const stockData = {
         "Rute Merjosari": { "05:00": 15, "05:15": 15, "05:30": 15 },
         "Rute Suhat": { "05:00": 15, "05:15": 15, "05:30": 15 },
@@ -30,46 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
         "Rute Ijen": { "05:00": 15, "05:15": 15, "05:30": 15 },
         "Rute Galunggung": { "05:00": 15, "05:15": 15, "05:30": 15 }
     };
-
-    // --- Efek Baru untuk Menu Navigasi ---
-    const navLinks = document.querySelectorAll('nav a');
-    const sections = document.querySelectorAll('.elegant-dark-section, .elegant-light-section');
-
-    function setActiveNavLink(id) {
-        navLinks.forEach(link => {
-            if (link.getAttribute('href') === `#${id}`) {
-                link.classList.add('nav-link-active');
-            } else {
-                link.classList.remove('nav-link-active');
-            }
-        });
-    }
-
-    window.addEventListener('scroll', function() {
-        let currentSection = '';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop - 150;
-            if (window.scrollY >= sectionTop) {
-                currentSection = section.getAttribute('id');
-            }
-        });
-        if (currentSection) {
-            setActiveNavLink(currentSection);
-        } else {
-            navLinks.forEach(link => link.classList.remove('nav-link-active'));
-        }
-    });
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', function (event) {
-            const targetId = this.getAttribute('href').substring(1);
-            if (targetId) {
-                navLinks.forEach(item => item.classList.remove('nav-link-active'));
-                this.classList.add('nav-link-active');
-            }
-        });
-    });
-    // --- Akhir dari Efek Baru ---
 
     let currentCardData = {};
     let userLocation = null;
@@ -106,13 +68,13 @@ document.addEventListener('DOMContentLoaded', function () {
             bookingForm.reset();
             modalBiayaPerjalanan.innerText = 'Menunggu lokasi...';
             modalTotalPembayaran.innerText = 'Menunggu lokasi...';
-            // Sembunyikan elemen jarak tempuh saat modal dibuka
             modalJarakTempuh.parentElement.classList.add('d-none');
             stokStatusSpan.innerText = 'Pilih tanggal dan jam';
             stokStatusSpan.classList.remove('text-success', 'text-danger');
             stokStatusSpan.classList.add('text-warning');
             pesanSekarangBtn.disabled = true;
             userLocation = null;
+            document.querySelectorAll('.required-warning').forEach(label => label.parentElement.classList.remove('is-invalid-label'));
         });
     });
 
@@ -134,15 +96,17 @@ document.addEventListener('DOMContentLoaded', function () {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
                     userLocation = { lat, lon };
-                    lokasiGoogleMapsInput.value = `https://www.google.com/maps?q=$${lat},${lon}`;
+                    lokasiGoogleMapsInput.value = `https://maps.google.com/?q=${lat},${lon}`;
                     calculateDistanceAndPrice();
-                    this.innerText = 'Gunakan Lokasi Saat Ini';
+                    this.innerText = '';
+                    this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>';
                     this.disabled = false;
                 },
                 error => {
                     geolocationError.classList.remove('d-none');
                     geolocationError.innerText = 'Gagal mendapatkan lokasi. Mohon izinkan akses atau masukkan tautan manual.';
-                    this.innerText = 'Gunakan Lokasi Saat Ini';
+                    this.innerText = '';
+                    this.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16"><path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/></svg>';
                     this.disabled = false;
                 }
             );
@@ -161,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             modalBiayaPerjalanan.innerText = 'Tautan tidak valid';
             modalTotalPembayaran.innerText = 'Tautan tidak valid';
-            // Sembunyikan kembali elemen jarak tempuh jika tautan tidak valid
             modalJarakTempuh.parentElement.classList.add('d-none');
             userLocation = null;
         }
@@ -170,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function calculateDistanceAndPrice() {
         if (!userLocation || !currentCardData.destinationLat) return;
 
-        const R = 6371;
+        const R = 6371; // Radius of Earth in km
         const dLat = deg2rad(currentCardData.destinationLat - userLocation.lat);
         const dLon = deg2rad(currentCardData.destinationLon - userLocation.lon);
 
@@ -180,18 +143,34 @@ document.addEventListener('DOMContentLoaded', function () {
             Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        const distance = R * c;
-        const roundedDistance = distance.toFixed(2);
-        
-        const basePricePerKm = 3000;
-        const basePrice = 10000;
-        const oneWayPrice = Math.round(basePrice + (distance * basePricePerKm));
-        const totalPrice = oneWayPrice * 2;
+        const distanceKm = R * c;
+        const distanceM = distanceKm * 1000;
+        const roundedDistanceKm = distanceKm.toFixed(2);
+
+        let oneWayPrice;
+        const tarif500m = 5000;
+        const tarifNormalPerM = 7;
+        const tarifDiskonPerM = 6;
+        const batasNormal = 5000; // 5 km dalam meter
+
+        if (distanceM <= 500) {
+            oneWayPrice = tarif500m;
+        } else if (distanceM > 500 && distanceM <= batasNormal) {
+            const sisaJarakM = distanceM - 500;
+            oneWayPrice = tarif500m + (sisaJarakM * tarifNormalPerM);
+        } else { // distanceM > 5000
+            const jarakDiAtas500m = distanceM - 500;
+            const jarakNormal = batasNormal - 500;
+            const jarakDiskon = jarakDiAtas500m - jarakNormal;
+            oneWayPrice = tarif500m + (jarakNormal * tarifNormalPerM) + (jarakDiskon * tarifDiskonPerM);
+        }
+
+        const totalPrice = Math.round(oneWayPrice * 2 / 100) * 100; // Round to nearest 100
+        oneWayPrice = Math.round(oneWayPrice / 100) * 100; // Round to nearest 100
 
         modalBiayaPerjalanan.innerText = `Rp. ${oneWayPrice.toLocaleString('id-ID')}`;
         modalTotalPembayaran.innerText = `Rp. ${totalPrice.toLocaleString('id-ID')}`;
-        modalJarakTempuh.innerText = `Jarak: ${roundedDistance} km`;
-        // Tampilkan elemen jarak tempuh setelah berhasil dihitung
+        modalJarakTempuh.innerText = `${roundedDistanceKm} km`;
         modalJarakTempuh.parentElement.classList.remove('d-none');
     }
 
@@ -199,26 +178,42 @@ document.addEventListener('DOMContentLoaded', function () {
         return deg * (Math.PI / 180);
     }
 
-    tanggalBookingInput.addEventListener('change', checkStok);
-    pilihanJamBerangkatContainer.addEventListener('change', checkStok);
-    pilihanJamPulangContainer.addEventListener('change', checkStok);
+    tanggalBookingInput.addEventListener('change', checkFormValidityAndStock);
+    pilihanJamBerangkatContainer.addEventListener('change', checkFormValidityAndStock);
+    pilihanJamPulangContainer.addEventListener('change', checkFormValidityAndStock);
+    namaPembeliInput.addEventListener('input', checkFormValidityAndStock);
+    alamatLengkapInput.addEventListener('input', checkFormValidityAndStock);
+    lokasiGoogleMapsInput.addEventListener('input', checkFormValidityAndStock);
 
-    function checkStok() {
+    function checkFormValidityAndStock() {
         const selectedDate = tanggalBookingInput.value;
         const selectedTimeBerangkat = bookingForm.querySelector('input[name="waktuBerangkat"]:checked')?.value;
         const selectedTimePulang = bookingForm.querySelector('input[name="waktuPulang"]:checked')?.value;
         const selectedRute = currentCardData.title;
+        const isFormValid = namaPembeliInput.value && alamatLengkapInput.value && lokasiGoogleMapsInput.value && selectedDate && selectedTimeBerangkat && selectedTimePulang;
 
         if (selectedDate && selectedTimeBerangkat && selectedTimePulang && selectedRute) {
+            const dateParts = selectedDate.split('-');
+            const dateObj = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]);
+            const day = dateObj.getDay(); // 0 = Minggu, 1 = Senin, ... 6 = Sabtu
+
+            if (day === 0 || day === 6) {
+                stokStatusSpan.innerText = 'Layanan tidak tersedia di akhir pekan.';
+                stokStatusSpan.classList.remove('text-success', 'text-warning');
+                stokStatusSpan.classList.add('text-danger');
+                pesanSekarangBtn.disabled = true;
+                return;
+            }
+
             if (stockData[selectedRute] && stockData[selectedRute][selectedTimeBerangkat]) {
                 const remainingStock = stockData[selectedRute][selectedTimeBerangkat];
 
-                stokStatusSpan.classList.remove('text-warning', 'text-danger', 'text-success');
+                stokStatusSpan.classList.remove('text-warning', 'text-danger');
 
                 if (remainingStock > 0) {
                     stokStatusSpan.innerText = `Tersedia (${remainingStock} kursi)`;
                     stokStatusSpan.classList.add('text-success');
-                    pesanSekarangBtn.disabled = false;
+                    pesanSekarangBtn.disabled = !isFormValid;
                 } else {
                     stokStatusSpan.innerText = 'Tidak Tersedia';
                     stokStatusSpan.classList.add('text-danger');
@@ -241,31 +236,30 @@ document.addEventListener('DOMContentLoaded', function () {
     pesanSekarangBtn.addEventListener('click', function (e) {
         e.preventDefault();
 
-        const namaPembeli = document.getElementById('namaPembeli').value;
-        const alamatLengkap = document.getElementById('alamatLengkap').value;
-        const lokasiGoogleMaps = document.getElementById('lokasiGoogleMaps').value;
-        const tanggalBooking = document.getElementById('tanggalBooking').value;
+        const namaPembeli = namaPembeliInput.value;
+        const alamatLengkap = alamatLengkapInput.value;
+        const lokasiGoogleMaps = lokasiGoogleMapsInput.value;
+        const tanggalBooking = tanggalBookingInput.value;
         const waktuBerangkat = bookingForm.querySelector('input[name="waktuBerangkat"]:checked')?.value;
         const waktuPulang = bookingForm.querySelector('input[name="waktuPulang"]:checked')?.value;
 
         let isValid = true;
-        
-        document.querySelectorAll('.required-warning').forEach(el => el.parentElement.classList.remove('is-invalid-label'));
+        document.querySelectorAll('form label').forEach(label => label.classList.remove('is-invalid-label'));
 
         if (!namaPembeli) {
-            document.getElementById('namaPembeli').previousElementSibling.classList.add('is-invalid-label');
+            document.querySelector('label[for="namaPembeli"]').classList.add('is-invalid-label');
             isValid = false;
         }
         if (!alamatLengkap) {
-            document.getElementById('alamatLengkap').previousElementSibling.classList.add('is-invalid-label');
+            document.querySelector('label[for="alamatLengkap"]').classList.add('is-invalid-label');
             isValid = false;
         }
         if (!lokasiGoogleMaps) {
-            document.getElementById('lokasiGoogleMaps').previousElementSibling.classList.add('is-invalid-label');
+            document.querySelector('label[for="lokasiGoogleMaps"]').classList.add('is-invalid-label');
             isValid = false;
         }
         if (!tanggalBooking) {
-            document.getElementById('tanggalBooking').previousElementSibling.classList.add('is-invalid-label');
+            document.querySelector('label[for="tanggalBooking"]').classList.add('is-invalid-label');
             isValid = false;
         }
         if (!waktuBerangkat) {
@@ -314,43 +308,51 @@ Mohon konfirmasi ketersediaan dan detail selanjutnya. Terima kasih!
         `;
 
         detailModal.hide();
+        const whatsappUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
+        
+        const existingWhatsappBtn = document.querySelector('#ticketModal .modal-footer .btn-success');
+        if (existingWhatsappBtn) {
+            existingWhatsappBtn.remove();
+        }
+
+        const whatsappBtn = document.createElement('a');
+        whatsappBtn.href = whatsappUrl;
+        whatsappBtn.target = '_blank';
+        whatsappBtn.className = 'btn btn-success fw-bold me-2';
+        whatsappBtn.innerText = 'Kirim ke WhatsApp';
+
+        const modalFooter = document.querySelector('#ticketModal .modal-footer');
+        modalFooter.insertBefore(whatsappBtn, cetakTiketBtn);
+        
         setTimeout(() => {
             ticketModal.show();
         }, 500);
 
-        const whatsappUrl = `https://wa.me/6281234567890?text=${encodeURIComponent(message)}`;
-        pesanSekarangBtn.dataset.whatsappUrl = whatsappUrl;
-
-        pesanSekarangBtn.addEventListener('click', function () {
-            window.open(this.dataset.whatsappUrl, '_blank');
+        cetakTiketBtn.addEventListener('click', function() {
+            const printContent = document.getElementById('ticketDetails').outerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Tiket Booking MaRide</title>
+                    <style>
+                        body { font-family: sans-serif; padding: 20px; }
+                        .ticket-container { border: 2px solid #333; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
+                        h2 { text-align: center; color: #333; }
+                        p { font-size: 16px; margin: 5px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="ticket-container">
+                        <h2>Tiket Booking MaRide</h2>
+                        <hr>
+                        ${printContent}
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
         });
-    });
-
-    cetakTiketBtn.addEventListener('click', function() {
-        const printContent = document.getElementById('ticketDetails').outerHTML;
-        const originalContent = document.body.innerHTML;
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Tiket Booking MaRide</title>
-                <style>
-                    body { font-family: sans-serif; padding: 20px; }
-                    .ticket-container { border: 2px solid #333; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
-                    h2 { text-align: center; color: #333; }
-                    p { font-size: 16px; margin: 5px 0; }
-                </style>
-            </head>
-            <body>
-                <div class="ticket-container">
-                    <h2>Tiket Booking MaRide</h2>
-                    <hr>
-                    ${printContent}
-                </div>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-        printWindow.print();
     });
 });
