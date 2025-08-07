@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnDetailList = document.querySelectorAll('.btnDetail');
     const modalJudul = document.getElementById('modal-judul-produk');
     const modalDeskripsi = document.getElementById('modal-deskripsi-produk');
-    const modalGambar = document = 'modal-gambar-produk');
+    const modalGambar = document.getElementById('modal-gambar-produk');
     const modalBiayaPerjalanan = document.getElementById('modal-biaya-perjalanan');
     const modalTotalPembayaran = document.getElementById('modal-total-pembayaran');
     const modalJarakTempuh = document.getElementById('modal-jarak-tempuh');
@@ -285,7 +285,7 @@ Berikut detail pesanan saya:
 Mohon konfirmasi ketersediaan dan detail selanjutnya. Terima kasih!
         `.trim();
 
-        // Mengarahkan langsung ke WhatsApp dengan nomor yang sudah dikonfirmasi
+        // Mengarahkan langsung ke WhatsApp
         const whatsappUrl = `https://wa.me/6289515750507?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
         
