@@ -145,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const distanceM = distanceKm * 1000;
 
         let oneWayPrice;
-        const tarif500m = 5000;
-        const tarifNormalPerM = 7.5;
+        const tarif500m = 8000;
+        const tarifNormalPerM = 8;
         const tarifDiskonPerM = 6;
         const batasNormal = 5000; // 5 km dalam meter
 
@@ -292,3 +292,4 @@ Mohon konfirmasi ketersediaan dan detail selanjutnya. Terima kasih!
         detailModal.hide();
     });
 });
+
