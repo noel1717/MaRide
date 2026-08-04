@@ -152,11 +152,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       let oneWayPrice;
       if (distanceM <= 500) {
-        oneWayPrice = 10000;
+        oneWayPrice = 9000;
       } else if (distanceM <= 5000) {
-        oneWayPrice = 10000 + (distanceM - 500) * 10;
+        oneWayPrice = 9000 + (distanceM - 500) * 9;
       } else {
-        oneWayPrice = 10000 + 4500 * 10 + (distanceM - 5000) * 8;
+        oneWayPrice = 9000 + 4500 * 9 + (distanceM - 5000) * 7;
       }
 
       oneWayPrice = Math.round(oneWayPrice / 100) * 100;
