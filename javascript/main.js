@@ -29,15 +29,14 @@ document.addEventListener("DOMContentLoaded", function () {
   const stokStatusSpan = document.getElementById("stokStatus");
   const pesanSekarangBtn = document.getElementById("pesanSekarangBtn");
 
-  const stockData = {
-    "Rute Merjosari": { "05:00": 15, "05:15": 15, "05:30": 15 },
-    "Rute Suhat": { "05:00": 15, "05:15": 15, "05:30": 15 },
-    "Rute Dinoyo": { "05:00": 15, "05:15": 15, "05:30": 15 },
-    "Rute Siguragura": { "05:00": 15, "05:15": 15, "05:30": 15 },
-    "Rute Ijen": { "05:00": 15, "05:15": 15, "05:30": 15 },
-    "Rute Galunggung": { "05:00": 15, "05:15": 15, "05:30": 15 },
-  };
-
+    const stockData = {
+        "Rute Merjosari": { "05:00": 4, "05:15": 4, "05:30": 4 },
+        "Rute Suhat": { "05:00": 4, "05:15": 4, "05:30": 4 },
+        "Rute Dinoyo": { "05:00": 4, "05:15": 4, "05:30": 4 },
+        "Rute Siguragura": { "05:00": 4, "05:15": 4, "05:30": 4 },
+        "Rute Ijen": { "05:00": 4, "05:15": 4, "05:30": 4 },
+        "Rute Galunggung": { "05:00": 4, "05:15": 4, "05:30": 4 }
+    };
   let currentCardData = {};
   let userLocation = null;
   let activeCard = null;
